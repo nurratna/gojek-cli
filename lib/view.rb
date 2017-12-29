@@ -15,6 +15,7 @@ module GoCLI
 
       print "Your email\t: "
       form[:email] = gets.chomp
+      form[:email].downcase!
 
       print "Your phone\t: "
       form[:phone] = gets.chomp
@@ -35,6 +36,7 @@ module GoCLI
 
       print "Enter your email/phone\t: "
       form[:login] = gets.chomp
+      form[:login].downcase!
 
       print "Enter your password\t: "
       form[:password] = gets.chomp
@@ -99,6 +101,7 @@ module GoCLI
 
       print "Your email\t: "
       form[:email] = gets.chomp
+      form[:email].downcase!
 
       print "Your phone\t: "
       form[:phone] = gets.chomp
@@ -118,15 +121,70 @@ module GoCLI
 
     # TODO: Complete order_goride method
     def self.order_goride(opts = {})
+      form = opts
+
+      puts 'Order Go-Ride'
+      puts ''
+
+      print "Origin\t\t: "
+      form[:origin] = gets.chomp
+      form[:origin].downcase!
+
+      print "Destination\t: "
+      form[:destination] = gets.chomp
+      form[:destination].downcase!
+
+      form[:steps] << {id: __method__}
+
+      form
     end
 
     # TODO: Complete order_goride_confirm method
     # This is invoked after user finishes inputting data in order_goride method
     def self.order_goride_confirm(opts = {})
+      form = opts
+
+      puts 'Review Order'
+      puts ''
+
+      puts "Origin\t\t:#{form[:origin]}"
+      puts "Destination\t:#{form[:destination]}"
+      puts "Cost\t\t:#{form[:est_price]}"
+      puts ''
+
+      puts '1. Order Now'
+      puts '2. Cancel'
+      puts '3. Back to Menu'
+
+      print 'Enter your option: '
+      form[:steps] << { id: __method__, option: gets.chomp }
+
+      form
     end
 
     # TODO: Complete view_order_history method
-    def self.view_order_history(opts = {})
+    def self.view_order_history(opts = {}, orders)
+      form = opts
+      i = 1
+
+      orders.each do |order|
+        puts "Order##{i}"
+        puts '---------------------------------------------'
+        puts "Timestamp\t: #{order['timestamp']}"
+        puts "Origin\t\t: #{order['origin']}"
+        puts "Destination\t: #{order['destination']}"
+        puts "Price\t\t: #{order['est_price']}"
+        puts '---------------------------------------------'
+        puts ''
+        i += 1
+      end
+
+      puts '1. Back to Menu'
+
+      print 'Enter your option: '
+      form[:steps] << { id: __method__, option: gets.chomp }
+
+      form
     end
   end
 end

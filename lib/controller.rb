@@ -1,5 +1,8 @@
 require_relative './models/user'
+require_relative './models/location'
+require_relative './models/order'
 require_relative './view'
+require 'time'
 
 module GoCLI
   # Controller is a class that call corresponding models and methods for every action
@@ -134,11 +137,78 @@ module GoCLI
 
     # TODO: Complete order_goride method
     def order_goride(opts = {})
+      clear_screen(opts)
+      form = View.order_goride(opts)
+
+      order = Order.new(
+        origin:     form[:origin],
+        destination:form[:destination]
+      )
+
+      error = order.validate
+      if error.empty?
+        origin = Location.find(form[:origin])
+        destination = Location.find(form[:destination])
+
+        if origin.nil?
+          form[:flash_msg] = "Sorry, origin is not available!"
+          main_menu(form)
+        elsif destination.nil?
+          form[:flash_msg] = "Sorry, destination is not available!"
+          main_menu(form)
+        else
+          form[:est_price] = Order.calculate_est_price(origin['coord'], destination['coord'])
+          order_goride_confirm(form)
+        end
+      else
+        form[:flash_msg] = error
+        order_goride(form)
+      end
     end
 
     # TODO: Complete order_goride_confirm method
     # This will be invoked after user finishes inputting data in order_goride method
     def order_goride_confirm(opts = {})
+      clear_screen(opts)
+      form = View.order_goride_confirm(opts)
+
+      order = Order.new(
+        timestamp:  Time.now,
+        origin:     form[:origin],
+        destination:form[:destination],
+        est_price:  form[:est_price]
+      )
+
+      case form[:steps].last[:option].to_i
+      when 1
+        order.save!
+        form[:order] = order
+        form[:flash_msg] = "Your order was successfully created"
+        main_menu(form)
+      when 2
+        order_goride(form)
+      when 3
+        main_menu(form)
+      else
+        form[:flash_msg] = "Wrong option entered, please retry."
+        order_goride_confirm(form)
+      end
+    end
+
+    def view_order_history(opts = {})
+      clear_screen(opts)
+      data = Order.load
+      form = View.view_order_history(opts, data)
+
+      case form[:steps].last[:option].to_i
+      when 1
+        main_menu(form)
+      else
+        form[:flash_msg] = "Wrong option entered, please retry."
+        view_order_history(form)
+      end
+
+      form
     end
 
     protected

@@ -1,1 +1,14 @@
-[{"timestamp":"2017-10-17 19:27:10 +0700","origin":"kemang","destination":"blok m","est_price":0.0},{"timestamp":"2017-10-17 19:27:24 +0700","origin":"blok m","destination":"sunter","est_price":0.0},{"timestamp":"2017-10-17 19:28:26 +0700","origin":"kemang","destination":"blok m","est_price":0.0},{"timestamp":"2017-10-18 07:02:36 +0700","origin":"menteng","destination":"kemang","est_price":0.0}]
+[
+  {
+    "timestamp": "2017-12-29 15:10:31 +0700",
+    "origin": "kemang",
+    "destination": "sunter",
+    "est_price": 54083.26913195984
+  },
+  {
+    "timestamp": "2017-12-29 15:11:59 +0700",
+    "origin": "kemang",
+    "destination": "blok m",
+    "est_price": 7500.0
+  }
+]
