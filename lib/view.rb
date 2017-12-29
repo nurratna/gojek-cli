@@ -10,10 +10,16 @@ module GoCLI
       puts 'Registration'
       puts ''
 
-      print 'Your phone: '
+      print "Your name\t: "
+      form[:name] = gets.chomp
+
+      print "Your email\t: "
+      form[:email] = gets.chomp
+
+      print "Your phone\t: "
       form[:phone] = gets.chomp
 
-      print 'Your password: '
+      print "Your password\t: "
       form[:password] = gets.chomp
 
       form[:steps] << {id: __method__}
@@ -27,10 +33,10 @@ module GoCLI
       puts 'Login'
       puts ''
 
-      print 'Enter your login: '
+      print "Enter your email/phone\t: "
       form[:login] = gets.chomp
 
-      print 'Enter your password: '
+      print "Enter your password\t: "
       form[:password] = gets.chomp
 
       form[:steps] << {id: __method__}
@@ -64,6 +70,11 @@ module GoCLI
       puts ''
 
       # Show user data here
+      user = form[:user]
+      puts "Name\t: #{user.name}"
+      puts "Email\t: #{user.email}"
+      puts "Phone\t: #{user.phone}"
+      puts "Password: #{user.password}"
       puts ''
 
       puts '1. Edit Profile'
@@ -78,6 +89,31 @@ module GoCLI
     # TODO: Complete edit_profile method
     # This is invoked if user chooses Edit Profile menu when viewing profile
     def self.edit_profile(opts = {})
+      form = opts
+
+      puts 'Edit Profile'
+      puts ''
+
+      print "Your name\t: "
+      form[:name] = gets.chomp
+
+      print "Your email\t: "
+      form[:email] = gets.chomp
+
+      print "Your phone\t: "
+      form[:phone] = gets.chomp
+
+      print "Your password\t: "
+      form[:password] = gets.chomp
+
+      puts ''
+      puts '1. Save'
+      puts '2. Back'
+
+      print 'Enter your option: '
+      form[:steps] << {id: __method__, option: gets.chomp}
+
+      form
     end
 
     # TODO: Complete order_goride method

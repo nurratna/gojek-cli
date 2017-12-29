@@ -18,10 +18,21 @@ module GoCLI
       # - invoke ".save!" method to user object
       # TODO: enable saving name and email
       user = User.new(
+        name:     form[:name],
+        email:    form[:email],
         phone:    form[:phone],
         password: form[:password]
       )
-      user.save!
+
+      error = user.validate
+      if error.empty?
+        user.save!
+        form[:flash_msg] = "Your account was successfully created"
+      else
+        form[:flash_msg] = ["Your account was not successfully created"]
+        form[:flash_msg] << error
+        registration(form)
+      end
 
       # Assigning form[:user] with user object
       form[:user] = user
@@ -29,7 +40,7 @@ module GoCLI
       # Returning the form
       form
     end
-    
+
     def login(opts = {})
       halt = false
       while !halt
@@ -46,7 +57,7 @@ module GoCLI
 
       return form
     end
-    
+
     def main_menu(opts = {})
       clear_screen(opts)
       form = View.main_menu(opts)
@@ -68,7 +79,7 @@ module GoCLI
         main_menu(form)
       end
     end
-    
+
     def view_profile(opts = {})
       clear_screen(opts)
       form = View.view_profile(opts)
@@ -88,6 +99,37 @@ module GoCLI
     # TODO: Complete edit_profile method
     # This will be invoked when user choose Edit Profile menu in view_profile screen
     def edit_profile(opts = {})
+      clear_screen(opts)
+      form = View.edit_profile(opts)
+
+      user = User.new(
+        name:     form[:name],
+        email:    form[:email],
+        phone:    form[:phone],
+        password: form[:password]
+      )
+
+      case form[:steps].last[:option].to_i
+      when 1
+        error = user.validate
+        if error.empty?
+          user.save!
+          form[:user] = user
+          form[:flash_msg] = "Your account was successfully updated"
+          view_profile(form)
+        else
+          form[:flash_msg] = ["Your account was not successfully updated"]
+          form[:flash_msg] << error
+          view_profile(form)
+        end
+      when 2
+        view_profile(form)
+      else
+        form[:flash_msg] = "Wrong option entered, please retry."
+        edit_profile(form)
+      end
+
+      form
     end
 
     # TODO: Complete order_goride method
@@ -100,7 +142,7 @@ module GoCLI
     end
 
     protected
-      # You don't need to modify this 
+      # You don't need to modify this
       def clear_screen(opts = {})
         Gem.win_platform? ? (system "cls") : (system "clear")
         if opts[:flash_msg]
@@ -112,7 +154,7 @@ module GoCLI
 
       # TODO: credential matching with email or phone
       def credential_match?(user, login, password)
-        return false unless user.phone == login
+        return false unless user.phone == login || user.email == login
         return false unless user.password == password
         return true
       end
