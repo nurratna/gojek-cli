@@ -1,6 +1,7 @@
 require_relative './models/user'
 require_relative './models/location'
 require_relative './models/order'
+require_relative './models/driver'
 require_relative './view'
 require 'time'
 
@@ -147,8 +148,9 @@ module GoCLI
 
       error = order.validate
       if error.empty?
-        origin = Location.find(form[:origin])
-        destination = Location.find(form[:destination])
+        locations = Location.load
+        origin = Location.find(form[:origin], locations)
+        destination = Location.find(form[:destination], locations)
 
         if origin.nil?
           form[:flash_msg] = "Sorry, origin is not available!"
@@ -157,7 +159,9 @@ module GoCLI
           form[:flash_msg] = "Sorry, destination is not available!"
           main_menu(form)
         else
-          form[:est_price] = Order.calculate_est_price(origin['coord'], destination['coord'])
+          form[:origin_coord] = origin['coord']
+          form[:destination_coord] = destination['coord']
+          form[:est_price] = Order.calculate_est_price(form[:origin_coord], form[:destination_coord])
           order_goride_confirm(form)
         end
       else
@@ -172,18 +176,27 @@ module GoCLI
       clear_screen(opts)
       form = View.order_goride_confirm(opts)
 
-      order = Order.new(
-        timestamp:  Time.now,
-        origin:     form[:origin],
-        destination:form[:destination],
-        est_price:  form[:est_price]
-      )
-
       case form[:steps].last[:option].to_i
       when 1
-        order.save!
-        form[:order] = order
-        form[:flash_msg] = "Your order was successfully created"
+        drivers = Driver.load
+        driver = Driver.find(form[:origin_coord], drivers)
+
+        if driver.nil?
+          form[:flash_msg] = "Sorry, your order was not successfully created.\nThe driver is busy"
+        else
+          order = Order.new(
+            timestamp:    Time.now,
+            origin:       form[:origin],
+            destination:  form[:destination],
+            est_price:    form[:est_price],
+            driver:       driver['driver']
+          )
+
+          Driver.changes_coord(driver['driver'], form[:destination_coord])
+          order.save!
+          form[:order] = order
+          form[:flash_msg] = "Your order was successfully created.\nThe driver is #{driver['driver']}"
+        end
         main_menu(form)
       when 2
         order_goride(form)

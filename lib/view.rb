@@ -174,6 +174,7 @@ module GoCLI
         puts "Origin\t\t: #{order['origin']}"
         puts "Destination\t: #{order['destination']}"
         puts "Price\t\t: #{order['est_price']}"
+        puts "Driver\t\t: #{order['driver']}"
         puts '---------------------------------------------'
         puts ''
         i += 1

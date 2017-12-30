@@ -1,0 +1,42 @@
+[
+  {
+    "driver": "Budi",
+    "coord": [
+      1,
+      2
+    ],
+    "service_type": "goride"
+  },
+  {
+    "driver": "Anna",
+    "coord": [
+      -20,
+      5
+    ],
+    "service_type": "goride"
+  },
+  {
+    "driver": "Anni",
+    "coord": [
+      -20,
+      5
+    ],
+    "service_type": "gocar"
+  },
+  {
+    "driver": "Andi",
+    "coord": [
+      20,
+      35
+    ],
+    "service_type": "gocar"
+  },
+  {
+    "driver": "anya",
+    "coord": [
+      15,
+      35
+    ],
+    "service_type": "gocar"
+  }
+]

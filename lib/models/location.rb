@@ -9,8 +9,8 @@ module GoCLI
       data = JSON.parse(file)
     end
 
-    def self.find(name_of_location)
-      locations = load
+    def self.find(name_of_location, locations)
+      # locations = load
       location = locations.find { |location| location.has_value?(name_of_location) }
     end
   end
