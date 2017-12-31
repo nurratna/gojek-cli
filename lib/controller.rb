@@ -25,12 +25,13 @@ module GoCLI
         name:     form[:name],
         email:    form[:email],
         phone:    form[:phone],
-        password: form[:password]
+        password: form[:password],
       )
 
       error = user.validate
       if error.empty?
         user.save!
+        form[:gopay] = 0
         form[:flash_msg] = "Your account was successfully created"
       else
         form[:flash_msg] = ["Your account was not successfully created"]
@@ -77,6 +78,8 @@ module GoCLI
         # Step 4.3
         view_order_history(form)
       when 4
+        topup_gopay(form)
+      when 5
         exit(true)
       else
         form[:flash_msg] = "Wrong option entered, please retry."
@@ -184,12 +187,41 @@ module GoCLI
     def order_goride_confirm(opts = {})
       clear_screen(opts)
       form = View.order_goride_confirm(opts)
-      puts form
+
+      drivers = Driver.load
+      driver = Driver.find(form[:origin_coord], form[:type], drivers)
+
       case form[:steps].last[:option].to_i
       when 1
-        drivers = Driver.load
-        driver = Driver.find(form[:origin_coord], form[:type], drivers)
+        user = form[:user]
+        if user.gopay < form[:est_price]
+          form[:flash_msg] = "Sorry, insufficient Go Pay credit"
+          order_goride_confirm(form)
+        else
+          if driver.nil?
+            form[:flash_msg] = "Sorry, your order was not successfully created.\nThe driver is busy"
+          else
+            user.gopay -= form[:est_price]
+            user.save!
 
+            form[:driver] = driver['driver']
+            order = Order.new(
+              timestamp:    Time.now,
+              origin:       form[:origin],
+              destination:  form[:destination],
+              est_price:    form[:est_price],
+              type:         form[:type],
+              driver:       form[:driver]
+            )
+
+            Driver.changes_coord(form[:driver], form[:destination_coord])
+            order.save!
+            form[:order] = order
+            form[:flash_msg] = "Your order was successfully created.\nThe driver is #{driver['driver']}"
+          end
+          main_menu(form)
+        end
+      when 2
         if driver.nil?
           form[:flash_msg] = "Sorry, your order was not successfully created.\nThe driver is busy"
         else
@@ -209,7 +241,7 @@ module GoCLI
           form[:flash_msg] = "Your order was successfully created.\nThe driver is #{driver['driver']}"
         end
         main_menu(form)
-      when 2
+      when 3
         order_goride(form)
       when 3
         main_menu(form)
@@ -230,6 +262,35 @@ module GoCLI
       else
         form[:flash_msg] = "Wrong option entered, please retry."
         view_order_history(form)
+      end
+
+      form
+    end
+
+    def topup_gopay(opts = {})
+      clear_screen(opts)
+      form = View.topup_gopay(opts)
+      user = form[:user]
+
+      case form[:steps].last[:option].to_i
+      when 1
+        error = user.validate
+        if error.empty?
+          user.gopay += form[:gopay].to_i
+          user.save!
+          form[:user] = user
+          form[:flash_msg] = "Your gopay credit was successfully updated"
+          view_profile(form)
+        else
+          form[:flash_msg] = ["Your gopay credit was not successfully updated"]
+          form[:flash_msg] << error
+          topup_gopay(form)
+        end
+      when 2
+        main_menu(form)
+      else
+        form[:flash_msg] = "Wrong option entered, please retry."
+        topup_gopay(form)
       end
 
       form
