@@ -5,7 +5,7 @@
       1,
       2
     ],
-    "service_type": "goride"
+    "type": "bike"
   },
   {
     "driver": "Anna",
@@ -13,7 +13,7 @@
       -20,
       5
     ],
-    "service_type": "goride"
+    "type": "bike"
   },
   {
     "driver": "Anni",
@@ -21,15 +21,15 @@
       -20,
       5
     ],
-    "service_type": "gocar"
+    "type": "car"
   },
   {
     "driver": "Andi",
     "coord": [
-      20,
+      15,
       35
     ],
-    "service_type": "gocar"
+    "type": "car"
   },
   {
     "driver": "anya",
@@ -37,6 +37,6 @@
       15,
       35
     ],
-    "service_type": "gocar"
+    "type": "bike"
   }
 ]

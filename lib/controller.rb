@@ -159,9 +159,18 @@ module GoCLI
           form[:flash_msg] = "Sorry, destination is not available!"
           main_menu(form)
         else
+          case form[:steps].last[:option].to_i
+          when 1
+            form[:type] = 'bike'
+          when 2
+            form[:type] = 'car'
+          else
+            form[:flash_msg] = "Wrong option entered, please retry."
+            order_goride(form)
+          end
           form[:origin_coord] = origin['coord']
           form[:destination_coord] = destination['coord']
-          form[:est_price] = Order.calculate_est_price(form[:origin_coord], form[:destination_coord])
+          form[:est_price] = Order.calculate_est_price(form[:origin_coord], form[:destination_coord], form[:type])
           order_goride_confirm(form)
         end
       else
@@ -175,24 +184,26 @@ module GoCLI
     def order_goride_confirm(opts = {})
       clear_screen(opts)
       form = View.order_goride_confirm(opts)
-
+      puts form
       case form[:steps].last[:option].to_i
       when 1
         drivers = Driver.load
-        driver = Driver.find(form[:origin_coord], drivers)
+        driver = Driver.find(form[:origin_coord], form[:type], drivers)
 
         if driver.nil?
           form[:flash_msg] = "Sorry, your order was not successfully created.\nThe driver is busy"
         else
+          form[:driver] = driver['driver']
           order = Order.new(
             timestamp:    Time.now,
             origin:       form[:origin],
             destination:  form[:destination],
             est_price:    form[:est_price],
-            driver:       driver['driver']
+            type:         form[:type],
+            driver:       form[:driver]
           )
 
-          Driver.changes_coord(driver['driver'], form[:destination_coord])
+          Driver.changes_coord(form[:driver], form[:destination_coord])
           order.save!
           form[:order] = order
           form[:flash_msg] = "Your order was successfully created.\nThe driver is #{driver['driver']}"

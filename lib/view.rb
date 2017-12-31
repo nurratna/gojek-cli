@@ -134,7 +134,12 @@ module GoCLI
       form[:destination] = gets.chomp
       form[:destination].downcase!
 
-      form[:steps] << {id: __method__}
+      puts ''
+      puts '1. Bike'
+      puts '2. Car'
+
+      print 'Enter your option: '
+      form[:steps] << {id: __method__, option: gets.chomp}
 
       form
     end
@@ -174,6 +179,7 @@ module GoCLI
         puts "Origin\t\t: #{order['origin']}"
         puts "Destination\t: #{order['destination']}"
         puts "Price\t\t: #{order['est_price']}"
+        puts "Type\t\t: #{order['type']}"
         puts "Driver\t\t: #{order['driver']}"
         puts '---------------------------------------------'
         puts ''

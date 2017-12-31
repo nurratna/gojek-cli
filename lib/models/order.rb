@@ -5,13 +5,15 @@ require 'time'
 module GoCLI
   class Order
     GORIDE_PER_KM = 1500
-    attr_accessor :timestamp, :origin, :destination, :est_price, :driver
+    GOCAR_PER_KM = 2500
+    attr_accessor :timestamp, :origin, :destination, :est_price, :type, :driver
 
     def initialize(opts = {})
       @timestamp = opts[:timestamp] || ''
 			@origin = opts[:origin] || ''
 			@destination = opts[:destination] || ''
 			@est_price = opts[:est_price] || ''
+      @type = opts[:type] || ''
       @driver = opts[:driver] || ''
     end
 
@@ -32,15 +34,19 @@ module GoCLI
       error
     end
 
-    def self.calculate_est_price(origin, destination)
+    def self.calculate_est_price(origin, destination, type)
       cost = 0
       distance = Math.sqrt(((destination.first - origin.first) ** 2) + ((destination.last - origin.last) ** 2)).to_f
-      cost = distance.round(2) * GORIDE_PER_KM
+      if type == 'bike'
+        cost = distance.round(2) * GORIDE_PER_KM
+      else
+        cost = distance.round(2) * GOCAR_PER_KM
+      end
       cost
     end
 
     def save!
-      order = {timestamp: @timestamp, origin: @origin, destination: @destination, est_price: @est_price, driver: @driver}
+      order = {timestamp: @timestamp, origin: @origin, destination: @destination, est_price: @est_price, type: @type, driver: @driver}
       data = Order.load
       data << order
       File.open("#{File.expand_path(File.dirname(__FILE__))}/../../data/orders.json", "w") do |f|

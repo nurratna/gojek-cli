@@ -10,7 +10,6 @@ module GoCLI
     end
 
     def self.find(name_of_location, locations)
-      # locations = load
       location = locations.find { |location| location.has_value?(name_of_location) }
     end
   end

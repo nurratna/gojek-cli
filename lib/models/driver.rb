@@ -26,11 +26,11 @@ module GoCLI
       distance.round(2)
 		end
 
-    def self.find(origin, drivers)
+    def self.find(origin, type, drivers)
       list_drivers = []
       drivers.each do |driver|
         distance = calculate_distance(origin, driver['coord'])
-        list_drivers << driver if distance <= MAX_DIST_DRIVER
+        list_drivers << driver if distance <= MAX_DIST_DRIVER && driver['type'] == type
       end
       driver = list_drivers.shuffle!.first
     end
