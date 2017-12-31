@@ -1,0 +1,12 @@
+[
+  {
+    "code": "GODISKON",
+    "type": "cash",
+    "amount": 10000
+  },
+  {
+    "code": "GOPROMO",
+    "type": "percentage",
+    "amount": 10
+  }
+]

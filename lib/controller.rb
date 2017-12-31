@@ -2,6 +2,7 @@ require_relative './models/user'
 require_relative './models/location'
 require_relative './models/order'
 require_relative './models/driver'
+require_relative './models/promo'
 require_relative './view'
 require 'time'
 
@@ -191,6 +192,9 @@ module GoCLI
       drivers = Driver.load
       driver = Driver.find(form[:origin_coord], form[:type], drivers)
 
+      promo = Promo.load
+      promo = Promo.find(form[:promo], promo)
+
       case form[:steps].last[:option].to_i
       when 1
         user = form[:user]
@@ -198,13 +202,31 @@ module GoCLI
           form[:flash_msg] = "Sorry, insufficient Go Pay credit"
           order_goride_confirm(form)
         else
+          form[:flash_msg] = []
           if driver.nil?
-            form[:flash_msg] = "Sorry, your order was not successfully created.\nThe driver is busy"
+            form[:flash_msg] << "Sorry, your order was not successfully created."
+            form[:flash_msg] << "The driver is busy"
           else
-            user.gopay -= form[:est_price]
-            user.save!
-
             form[:driver] = driver['driver']
+            form[:flash_msg] << "Your order was successfully created."
+            form[:flash_msg] << "The driver is #{driver['driver']}"
+
+            if promo.nil?
+              user.gopay -= form[:est_price]
+              user.save!
+              form[:flash_msg] << "Sorry, you don't have a promo code."
+            else
+              if promo['type'] == 'cash'
+                form[:est_price] -= promo['amount']
+                form[:est_price] = 0 if form[:est_price] < 0
+              else
+                form[:est_price] -= (form[:est_price] * promo['amount'] / 100)
+              end
+              user.gopay -= form[:est_price]
+              user.save!
+              form[:flash_msg] << "Yeay, you have a promo code. You just pay Rp #{form[:est_price]}"
+            end
+
             order = Order.new(
               timestamp:    Time.now,
               origin:       form[:origin],
@@ -217,15 +239,31 @@ module GoCLI
             Driver.changes_coord(form[:driver], form[:destination_coord])
             order.save!
             form[:order] = order
-            form[:flash_msg] = "Your order was successfully created.\nThe driver is #{driver['driver']}"
           end
           main_menu(form)
         end
       when 2
+        form[:flash_msg] = []
         if driver.nil?
-          form[:flash_msg] = "Sorry, your order was not successfully created.\nThe driver is busy"
+          form[:flash_msg] << "Sorry, your order was not successfully created."
+          form[:flash_msg] << "The driver is busy"
         else
           form[:driver] = driver['driver']
+          form[:flash_msg] << "Your order was successfully created."
+          form[:flash_msg] << "The driver is #{driver['driver']}"
+
+          if promo.nil?
+            form[:flash_msg] << "Sorry, you don't have a promo code."
+          else
+            if promo['type'] == 'cash'
+              form[:est_price] -= promo['amount']
+              form[:est_price] = 0 if form[:est_price] < 0
+            else
+              form[:est_price] -= (form[:est_price] * promo['amount'] / 100)
+            end
+            form[:flash_msg] << "Yeay, you have a promo code. You just pay Rp #{form[:est_price]}"
+          end
+
           order = Order.new(
             timestamp:    Time.now,
             origin:       form[:origin],
@@ -238,12 +276,11 @@ module GoCLI
           Driver.changes_coord(form[:driver], form[:destination_coord])
           order.save!
           form[:order] = order
-          form[:flash_msg] = "Your order was successfully created.\nThe driver is #{driver['driver']}"
         end
         main_menu(form)
       when 3
         order_goride(form)
-      when 3
+      when 4
         main_menu(form)
       else
         form[:flash_msg] = "Wrong option entered, please retry."

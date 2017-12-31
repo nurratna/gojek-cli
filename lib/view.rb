@@ -154,11 +154,15 @@ module GoCLI
       puts 'Review Order'
       puts ''
 
-      puts "Origin\t\t:#{form[:origin]}"
-      puts "Destination\t:#{form[:destination]}"
-      puts "Cost\t\t:#{form[:est_price]}"
-      puts ''
+      puts "Origin\t\t: #{form[:origin]}"
+      puts "Destination\t: #{form[:destination]}"
+      puts "Cost\t\t: #{form[:est_price]}"
 
+      print "Promo Code\t: "
+      form[:promo] = gets.chomp
+      form[:promo].upcase!
+
+      puts ''
       puts '1. Pay with Gopay'
       puts '2. Pay with Cash'
       puts '3. Cancel'
